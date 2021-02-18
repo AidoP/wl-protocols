@@ -1,0 +1,7 @@
+#!/bin/sh
+
+cargo build --release
+c=target/release/wl-protocol
+
+$c /usr/share/wayland/wayland.xml -o protocol/wayland.toml
+$c /usr/share/wayland-protocols/ -o protocol/ -r

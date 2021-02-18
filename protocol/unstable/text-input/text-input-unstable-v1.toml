@@ -1,0 +1,656 @@
+name = 'text_input_unstable_v1'
+copyright = '''
+Copyright © 2012, 2013 Intel Corporation
+
+Permission is hereby granted, free of charge, to any person obtaining a
+copy of this software and associated documentation files (the "Software"),
+to deal in the Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute, sublicense,
+and/or sell copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice (including the next
+paragraph) shall be included in all copies or substantial portions of the
+Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.'''
+
+[[interface]]
+name = 'zwp_text_input_v1'
+summary = 'text input'
+description = '''
+An object used for text input. Adds support for text input and input
+methods to applications. A text_input object is created from a
+wl_text_input_manager and corresponds typically to a text entry in an
+application.
+
+Requests are used to activate/deactivate the text_input object and set
+state information like surrounding and selected text or the content type.
+The information about entered text is sent to the text_input object via
+the pre-edit and commit events. Using this interface removes the need
+for applications to directly process hardware key events and compose text
+out of them.
+
+Text is generally UTF-8 encoded, indices and lengths are in bytes.
+
+Serials are used to synchronize the state between the text input and
+an input method. New serials are sent by the text input in the
+commit_state request and are used by the input method to indicate
+the known text input state in events like preedit_string, commit_string,
+and keysym. The text input can then ignore events from the input method
+which are based on an outdated state (for example after a reset).
+
+Warning! The protocol described in this file is experimental and
+backward incompatible changes may be made. Backward compatible changes
+may be added together with the corresponding interface version bump.
+Backward incompatible changes are done by bumping the version number in
+the protocol and interface names and resetting the interface version.
+Once the protocol is to be declared stable, the 'z' prefix and the
+version number in the protocol and interface names are removed and the
+interface version number is reset.'''
+version = 1
+
+[[interface.enum]]
+name = 'content_hint'
+summary = 'content hint'
+description = '''
+Content hint is a bitmask to allow to modify the behavior of the text
+input.'''
+
+[[interface.enum.entry]]
+name = 'none'
+summary = 'no special behaviour'
+value = 0
+
+[[interface.enum.entry]]
+name = 'default'
+summary = 'auto completion, correction and capitalization'
+value = 7
+
+[[interface.enum.entry]]
+name = 'password'
+summary = 'hidden and sensitive text'
+value = 192
+
+[[interface.enum.entry]]
+name = 'auto_completion'
+summary = 'suggest word completions'
+value = 1
+
+[[interface.enum.entry]]
+name = 'auto_correction'
+summary = 'suggest word corrections'
+value = 2
+
+[[interface.enum.entry]]
+name = 'auto_capitalization'
+summary = 'switch to uppercase letters at the start of a sentence'
+value = 4
+
+[[interface.enum.entry]]
+name = 'lowercase'
+summary = 'prefer lowercase letters'
+value = 8
+
+[[interface.enum.entry]]
+name = 'uppercase'
+summary = 'prefer uppercase letters'
+value = 16
+
+[[interface.enum.entry]]
+name = 'titlecase'
+summary = 'prefer casing for titles and headings (can be language dependent)'
+value = 32
+
+[[interface.enum.entry]]
+name = 'hidden_text'
+summary = 'characters should be hidden'
+value = 64
+
+[[interface.enum.entry]]
+name = 'sensitive_data'
+summary = 'typed text should not be stored'
+value = 128
+
+[[interface.enum.entry]]
+name = 'latin'
+summary = 'just latin characters should be entered'
+value = 256
+
+[[interface.enum.entry]]
+name = 'multiline'
+summary = 'the text input is multiline'
+value = 512
+
+[[interface.enum]]
+name = 'content_purpose'
+summary = 'content purpose'
+description = '''
+The content purpose allows to specify the primary purpose of a text
+input.
+
+This allows an input method to show special purpose input panels with
+extra characters or to disallow some characters.'''
+
+[[interface.enum.entry]]
+name = 'normal'
+summary = 'default input, allowing all characters'
+value = 0
+
+[[interface.enum.entry]]
+name = 'alpha'
+summary = 'allow only alphabetic characters'
+value = 1
+
+[[interface.enum.entry]]
+name = 'digits'
+summary = 'allow only digits'
+value = 2
+
+[[interface.enum.entry]]
+name = 'number'
+summary = 'input a number (including decimal separator and sign)'
+value = 3
+
+[[interface.enum.entry]]
+name = 'phone'
+summary = 'input a phone number'
+value = 4
+
+[[interface.enum.entry]]
+name = 'url'
+summary = 'input an URL'
+value = 5
+
+[[interface.enum.entry]]
+name = 'email'
+summary = 'input an email address'
+value = 6
+
+[[interface.enum.entry]]
+name = 'name'
+summary = 'input a name of a person'
+value = 7
+
+[[interface.enum.entry]]
+name = 'password'
+summary = 'input a password (combine with password or sensitive_data hint)'
+value = 8
+
+[[interface.enum.entry]]
+name = 'date'
+summary = 'input a date'
+value = 9
+
+[[interface.enum.entry]]
+name = 'time'
+summary = 'input a time'
+value = 10
+
+[[interface.enum.entry]]
+name = 'datetime'
+summary = 'input a date and time'
+value = 11
+
+[[interface.enum.entry]]
+name = 'terminal'
+summary = 'input for a terminal'
+value = 12
+
+[[interface.enum]]
+name = 'preedit_style'
+
+[[interface.enum.entry]]
+name = 'default'
+summary = 'default style for composing text'
+value = 0
+
+[[interface.enum.entry]]
+name = 'none'
+summary = 'style should be the same as in non-composing text'
+value = 1
+
+[[interface.enum.entry]]
+name = 'active'
+value = 2
+
+[[interface.enum.entry]]
+name = 'inactive'
+value = 3
+
+[[interface.enum.entry]]
+name = 'highlight'
+value = 4
+
+[[interface.enum.entry]]
+name = 'underline'
+value = 5
+
+[[interface.enum.entry]]
+name = 'selection'
+value = 6
+
+[[interface.enum.entry]]
+name = 'incorrect'
+value = 7
+
+[[interface.enum]]
+name = 'text_direction'
+
+[[interface.enum.entry]]
+name = 'auto'
+summary = 'automatic text direction based on text and language'
+value = 0
+
+[[interface.enum.entry]]
+name = 'ltr'
+summary = 'left-to-right'
+value = 1
+
+[[interface.enum.entry]]
+name = 'rtl'
+summary = 'right-to-left'
+value = 2
+
+[[interface.request]]
+name = 'activate'
+summary = 'request activation'
+description = '''
+Requests the text_input object to be activated (typically when the
+text entry gets focus).
+
+The seat argument is a wl_seat which maintains the focus for this
+activation. The surface argument is a wl_surface assigned to the
+text_input object and tracked for focus lost. The enter event
+is emitted on successful activation.'''
+
+[[interface.request.arg]]
+name = 'seat'
+type = 'object'
+interface = 'wl_seat'
+
+[[interface.request.arg]]
+name = 'surface'
+type = 'object'
+interface = 'wl_surface'
+
+[[interface.request]]
+name = 'deactivate'
+summary = 'request deactivation'
+description = '''
+Requests the text_input object to be deactivated (typically when the
+text entry lost focus). The seat argument is a wl_seat which was used
+for activation.'''
+
+[[interface.request.arg]]
+name = 'seat'
+type = 'object'
+interface = 'wl_seat'
+
+[[interface.request]]
+name = 'show_input_panel'
+summary = 'show input panels'
+description = 'Requests input panels (virtual keyboard) to show.'
+
+[[interface.request]]
+name = 'hide_input_panel'
+summary = 'hide input panels'
+description = 'Requests input panels (virtual keyboard) to hide.'
+
+[[interface.request]]
+name = 'reset'
+summary = 'reset'
+description = '''
+Should be called by an editor widget when the input state should be
+reset, for example after the text was changed outside of the normal
+input method flow.'''
+
+[[interface.request]]
+name = 'set_surrounding_text'
+summary = 'sets the surrounding text'
+description = '''
+Sets the plain surrounding text around the input position. Text is
+UTF-8 encoded. Cursor is the byte offset within the
+surrounding text. Anchor is the byte offset of the
+selection anchor within the surrounding text. If there is no selected
+text anchor, then it is the same as cursor.'''
+
+[[interface.request.arg]]
+name = 'text'
+type = 'string'
+
+[[interface.request.arg]]
+name = 'cursor'
+type = 'uint'
+
+[[interface.request.arg]]
+name = 'anchor'
+type = 'uint'
+
+[[interface.request]]
+name = 'set_content_type'
+summary = 'set content purpose and hint'
+description = '''
+Sets the content purpose and content hint. While the purpose is the
+basic purpose of an input field, the hint flags allow to modify some
+of the behavior.
+
+When no content type is explicitly set, a normal content purpose with
+default hints (auto completion, auto correction, auto capitalization)
+should be assumed.'''
+
+[[interface.request.arg]]
+name = 'hint'
+type = 'uint'
+
+[[interface.request.arg]]
+name = 'purpose'
+type = 'uint'
+
+[[interface.request]]
+name = 'set_cursor_rectangle'
+
+[[interface.request.arg]]
+name = 'x'
+type = 'int'
+
+[[interface.request.arg]]
+name = 'y'
+type = 'int'
+
+[[interface.request.arg]]
+name = 'width'
+type = 'int'
+
+[[interface.request.arg]]
+name = 'height'
+type = 'int'
+
+[[interface.request]]
+name = 'set_preferred_language'
+summary = 'sets preferred language'
+description = '''
+Sets a specific language. This allows for example a virtual keyboard to
+show a language specific layout. The "language" argument is an RFC-3066
+format language tag.
+
+It could be used for example in a word processor to indicate the
+language of the currently edited document or in an instant message
+application which tracks languages of contacts.'''
+
+[[interface.request.arg]]
+name = 'language'
+type = 'string'
+
+[[interface.request]]
+name = 'commit_state'
+
+[[interface.request.arg]]
+name = 'serial'
+type = 'uint'
+summary = 'used to identify the known state'
+
+[[interface.request]]
+name = 'invoke_action'
+
+[[interface.request.arg]]
+name = 'button'
+type = 'uint'
+
+[[interface.request.arg]]
+name = 'index'
+type = 'uint'
+
+[[interface.event]]
+name = 'enter'
+summary = 'enter event'
+description = '''
+Notify the text_input object when it received focus. Typically in
+response to an activate request.'''
+
+[[interface.event.arg]]
+name = 'surface'
+type = 'object'
+interface = 'wl_surface'
+
+[[interface.event]]
+name = 'leave'
+summary = 'leave event'
+description = '''
+Notify the text_input object when it lost focus. Either in response
+to a deactivate request or when the assigned surface lost focus or was
+destroyed.'''
+
+[[interface.event]]
+name = 'modifiers_map'
+summary = 'modifiers map'
+description = '''
+Transfer an array of 0-terminated modifier names. The position in
+the array is the index of the modifier as used in the modifiers
+bitmask in the keysym event.'''
+
+[[interface.event.arg]]
+name = 'map'
+type = 'array'
+
+[[interface.event]]
+name = 'input_panel_state'
+summary = 'state of the input panel'
+description = 'Notify when the visibility state of the input panel changed.'
+
+[[interface.event.arg]]
+name = 'state'
+type = 'uint'
+
+[[interface.event]]
+name = 'preedit_string'
+summary = 'pre-edit'
+description = '''
+Notify when a new composing text (pre-edit) should be set around the
+current cursor position. Any previously set composing text should
+be removed.
+
+The commit text can be used to replace the preedit text on reset
+(for example on unfocus).
+
+The text input should also handle all preedit_style and preedit_cursor
+events occurring directly before preedit_string.'''
+
+[[interface.event.arg]]
+name = 'serial'
+type = 'uint'
+summary = 'serial of the latest known text input state'
+
+[[interface.event.arg]]
+name = 'text'
+type = 'string'
+
+[[interface.event.arg]]
+name = 'commit'
+type = 'string'
+
+[[interface.event]]
+name = 'preedit_styling'
+summary = 'pre-edit styling'
+description = '''
+Sets styling information on composing text. The style is applied for
+length bytes from index relative to the beginning of the composing
+text (as byte offset). Multiple styles can
+be applied to a composing text by sending multiple preedit_styling
+events.
+
+This event is handled as part of a following preedit_string event.'''
+
+[[interface.event.arg]]
+name = 'index'
+type = 'uint'
+
+[[interface.event.arg]]
+name = 'length'
+type = 'uint'
+
+[[interface.event.arg]]
+name = 'style'
+type = 'uint'
+
+[[interface.event]]
+name = 'preedit_cursor'
+summary = 'pre-edit cursor'
+description = '''
+Sets the cursor position inside the composing text (as byte
+offset) relative to the start of the composing text. When index is a
+negative number no cursor is shown.
+
+This event is handled as part of a following preedit_string event.'''
+
+[[interface.event.arg]]
+name = 'index'
+type = 'int'
+
+[[interface.event]]
+name = 'commit_string'
+summary = 'commit'
+description = '''
+Notify when text should be inserted into the editor widget. The text to
+commit could be either just a single character after a key press or the
+result of some composing (pre-edit). It could also be an empty text
+when some text should be removed (see delete_surrounding_text) or when
+the input cursor should be moved (see cursor_position).
+
+Any previously set composing text should be removed.'''
+
+[[interface.event.arg]]
+name = 'serial'
+type = 'uint'
+summary = 'serial of the latest known text input state'
+
+[[interface.event.arg]]
+name = 'text'
+type = 'string'
+
+[[interface.event]]
+name = 'cursor_position'
+summary = 'set cursor to new position'
+description = '''
+Notify when the cursor or anchor position should be modified.
+
+This event should be handled as part of a following commit_string
+event.'''
+
+[[interface.event.arg]]
+name = 'index'
+type = 'int'
+
+[[interface.event.arg]]
+name = 'anchor'
+type = 'int'
+
+[[interface.event]]
+name = 'delete_surrounding_text'
+summary = 'delete surrounding text'
+description = '''
+Notify when the text around the current cursor position should be
+deleted.
+
+Index is relative to the current cursor (in bytes).
+Length is the length of deleted text (in bytes).
+
+This event should be handled as part of a following commit_string
+event.'''
+
+[[interface.event.arg]]
+name = 'index'
+type = 'int'
+
+[[interface.event.arg]]
+name = 'length'
+type = 'uint'
+
+[[interface.event]]
+name = 'keysym'
+summary = 'keysym'
+description = '''
+Notify when a key event was sent. Key events should not be used
+for normal text input operations, which should be done with
+commit_string, delete_surrounding_text, etc. The key event follows
+the wl_keyboard key event convention. Sym is an XKB keysym, state a
+wl_keyboard key_state. Modifiers are a mask for effective modifiers
+(where the modifier indices are set by the modifiers_map event)'''
+
+[[interface.event.arg]]
+name = 'serial'
+type = 'uint'
+summary = 'serial of the latest known text input state'
+
+[[interface.event.arg]]
+name = 'time'
+type = 'uint'
+
+[[interface.event.arg]]
+name = 'sym'
+type = 'uint'
+
+[[interface.event.arg]]
+name = 'state'
+type = 'uint'
+
+[[interface.event.arg]]
+name = 'modifiers'
+type = 'uint'
+
+[[interface.event]]
+name = 'language'
+summary = 'language'
+description = '''
+Sets the language of the input text. The "language" argument is an
+RFC-3066 format language tag.'''
+
+[[interface.event.arg]]
+name = 'serial'
+type = 'uint'
+summary = 'serial of the latest known text input state'
+
+[[interface.event.arg]]
+name = 'language'
+type = 'string'
+
+[[interface.event]]
+name = 'text_direction'
+summary = 'text direction'
+description = '''
+Sets the text direction of input text.
+
+It is mainly needed for showing an input cursor on the correct side of
+the editor when there is no input done yet and making sure neutral
+direction text is laid out properly.'''
+
+[[interface.event.arg]]
+name = 'serial'
+type = 'uint'
+summary = 'serial of the latest known text input state'
+
+[[interface.event.arg]]
+name = 'direction'
+type = 'uint'
+
+[[interface]]
+name = 'zwp_text_input_manager_v1'
+summary = 'text input manager'
+description = 'A factory for text_input objects. This object is a global singleton.'
+version = 1
+
+[[interface.request]]
+name = 'create_text_input'
+summary = 'create text input'
+description = 'Creates a new text_input object.'
+
+[[interface.request.arg]]
+name = 'id'
+type = 'new_id'
+interface = 'zwp_text_input_v1'

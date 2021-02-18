@@ -1,0 +1,288 @@
+name = 'pointer_gestures_unstable_v1'
+
+[[interface]]
+name = 'zwp_pointer_gestures_v1'
+summary = 'touchpad gestures'
+description = '''
+A global interface to provide semantic touchpad gestures for a given
+pointer.
+
+Two gestures are currently supported: swipe and zoom/rotate.
+All gestures follow a three-stage cycle: begin, update, end and
+are identified by a unique id.
+
+Warning! The protocol described in this file is experimental and
+backward incompatible changes may be made. Backward compatible changes
+may be added together with the corresponding interface version bump.
+Backward incompatible changes are done by bumping the version number in
+the protocol and interface names and resetting the interface version.
+Once the protocol is to be declared stable, the 'z' prefix and the
+version number in the protocol and interface names are removed and the
+interface version number is reset.'''
+version = 2
+
+[[interface.request]]
+name = 'get_swipe_gesture'
+summary = 'get swipe gesture'
+description = '''
+Create a swipe gesture object. See the
+wl_pointer_gesture_swipe interface for details.'''
+
+[[interface.request.arg]]
+name = 'id'
+type = 'new_id'
+interface = 'zwp_pointer_gesture_swipe_v1'
+
+[[interface.request.arg]]
+name = 'pointer'
+type = 'object'
+interface = 'wl_pointer'
+
+[[interface.request]]
+name = 'get_pinch_gesture'
+summary = 'get pinch gesture'
+description = '''
+Create a pinch gesture object. See the
+wl_pointer_gesture_pinch interface for details.'''
+
+[[interface.request.arg]]
+name = 'id'
+type = 'new_id'
+interface = 'zwp_pointer_gesture_pinch_v1'
+
+[[interface.request.arg]]
+name = 'pointer'
+type = 'object'
+interface = 'wl_pointer'
+
+[[interface.request]]
+name = 'release'
+since = 2
+destructor = true
+summary = 'destroy the pointer gesture object'
+description = '''
+Destroy the pointer gesture object. Swipe and pinch objects created via this
+gesture object remain valid.'''
+
+[[interface]]
+name = 'zwp_pointer_gesture_swipe_v1'
+summary = 'a swipe gesture object'
+description = '''
+A swipe gesture object notifies a client about a multi-finger swipe
+gesture detected on an indirect input device such as a touchpad.
+The gesture is usually initiated by multiple fingers moving in the
+same direction but once initiated the direction may change.
+The precise conditions of when such a gesture is detected are
+implementation-dependent.
+
+A gesture consists of three stages: begin, update (optional) and end.
+There cannot be multiple simultaneous pinch or swipe gestures on a
+same pointer/seat, how compositors prevent these situations is
+implementation-dependent.
+
+A gesture may be cancelled by the compositor or the hardware.
+Clients should not consider performing permanent or irreversible
+actions until the end of a gesture has been received.'''
+version = 2
+
+[[interface.request]]
+name = 'destroy'
+destructor = true
+summary = 'destroy the pointer swipe gesture object'
+
+[[interface.event]]
+name = 'begin'
+summary = 'multi-finger swipe begin'
+description = '''
+This event is sent when a multi-finger swipe gesture is detected
+on the device.'''
+
+[[interface.event.arg]]
+name = 'serial'
+type = 'uint'
+
+[[interface.event.arg]]
+name = 'time'
+type = 'uint'
+summary = 'timestamp with millisecond granularity'
+
+[[interface.event.arg]]
+name = 'surface'
+type = 'object'
+interface = 'wl_surface'
+
+[[interface.event.arg]]
+name = 'fingers'
+type = 'uint'
+summary = 'number of fingers'
+
+[[interface.event]]
+name = 'update'
+summary = 'multi-finger swipe motion'
+description = '''
+This event is sent when a multi-finger swipe gesture changes the
+position of the logical center.
+
+The dx and dy coordinates are relative coordinates of the logical
+center of the gesture compared to the previous event.'''
+
+[[interface.event.arg]]
+name = 'time'
+type = 'uint'
+summary = 'timestamp with millisecond granularity'
+
+[[interface.event.arg]]
+name = 'dx'
+type = 'fixed'
+summary = 'delta x coordinate in surface coordinate space'
+
+[[interface.event.arg]]
+name = 'dy'
+type = 'fixed'
+summary = 'delta y coordinate in surface coordinate space'
+
+[[interface.event]]
+name = 'end'
+summary = 'multi-finger swipe end'
+description = '''
+This event is sent when a multi-finger swipe gesture ceases to
+be valid. This may happen when one or more fingers are lifted or
+the gesture is cancelled.
+
+When a gesture is cancelled, the client should undo state changes
+caused by this gesture. What causes a gesture to be cancelled is
+implementation-dependent.'''
+
+[[interface.event.arg]]
+name = 'serial'
+type = 'uint'
+
+[[interface.event.arg]]
+name = 'time'
+type = 'uint'
+summary = 'timestamp with millisecond granularity'
+
+[[interface.event.arg]]
+name = 'cancelled'
+type = 'int'
+summary = '1 if the gesture was cancelled, 0 otherwise'
+
+[[interface]]
+name = 'zwp_pointer_gesture_pinch_v1'
+summary = 'a pinch gesture object'
+description = '''
+A pinch gesture object notifies a client about a multi-finger pinch
+gesture detected on an indirect input device such as a touchpad.
+The gesture is usually initiated by multiple fingers moving towards
+each other or away from each other, or by two or more fingers rotating
+around a logical center of gravity. The precise conditions of when
+such a gesture is detected are implementation-dependent.
+
+A gesture consists of three stages: begin, update (optional) and end.
+There cannot be multiple simultaneous pinch or swipe gestures on a
+same pointer/seat, how compositors prevent these situations is
+implementation-dependent.
+
+A gesture may be cancelled by the compositor or the hardware.
+Clients should not consider performing permanent or irreversible
+actions until the end of a gesture has been received.'''
+version = 2
+
+[[interface.request]]
+name = 'destroy'
+destructor = true
+summary = 'destroy the pinch gesture object'
+
+[[interface.event]]
+name = 'begin'
+summary = 'multi-finger pinch begin'
+description = '''
+This event is sent when a multi-finger pinch gesture is detected
+on the device.'''
+
+[[interface.event.arg]]
+name = 'serial'
+type = 'uint'
+
+[[interface.event.arg]]
+name = 'time'
+type = 'uint'
+summary = 'timestamp with millisecond granularity'
+
+[[interface.event.arg]]
+name = 'surface'
+type = 'object'
+interface = 'wl_surface'
+
+[[interface.event.arg]]
+name = 'fingers'
+type = 'uint'
+summary = 'number of fingers'
+
+[[interface.event]]
+name = 'update'
+summary = 'multi-finger pinch motion'
+description = '''
+This event is sent when a multi-finger pinch gesture changes the
+position of the logical center, the rotation or the relative scale.
+
+The dx and dy coordinates are relative coordinates in the
+surface coordinate space of the logical center of the gesture.
+
+The scale factor is an absolute scale compared to the
+pointer_gesture_pinch.begin event, e.g. a scale of 2 means the fingers
+are now twice as far apart as on pointer_gesture_pinch.begin.
+
+The rotation is the relative angle in degrees clockwise compared to the previous
+pointer_gesture_pinch.begin or pointer_gesture_pinch.update event.'''
+
+[[interface.event.arg]]
+name = 'time'
+type = 'uint'
+summary = 'timestamp with millisecond granularity'
+
+[[interface.event.arg]]
+name = 'dx'
+type = 'fixed'
+summary = 'delta x coordinate in surface coordinate space'
+
+[[interface.event.arg]]
+name = 'dy'
+type = 'fixed'
+summary = 'delta y coordinate in surface coordinate space'
+
+[[interface.event.arg]]
+name = 'scale'
+type = 'fixed'
+summary = 'scale relative to the initial finger position'
+
+[[interface.event.arg]]
+name = 'rotation'
+type = 'fixed'
+summary = 'angle in degrees cw relative to the previous event'
+
+[[interface.event]]
+name = 'end'
+summary = 'multi-finger pinch end'
+description = '''
+This event is sent when a multi-finger pinch gesture ceases to
+be valid. This may happen when one or more fingers are lifted or
+the gesture is cancelled.
+
+When a gesture is cancelled, the client should undo state changes
+caused by this gesture. What causes a gesture to be cancelled is
+implementation-dependent.'''
+
+[[interface.event.arg]]
+name = 'serial'
+type = 'uint'
+
+[[interface.event.arg]]
+name = 'time'
+type = 'uint'
+summary = 'timestamp with millisecond granularity'
+
+[[interface.event.arg]]
+name = 'cancelled'
+type = 'int'
+summary = '1 if the gesture was cancelled, 0 otherwise'
