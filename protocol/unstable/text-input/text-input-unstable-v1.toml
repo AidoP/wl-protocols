@@ -348,10 +348,12 @@ should be assumed.'''
 [[interface.request.arg]]
 name = 'hint'
 type = 'uint'
+enum = 'content_hint'
 
 [[interface.request.arg]]
 name = 'purpose'
 type = 'uint'
+enum = 'content_purpose'
 
 [[interface.request]]
 name = 'set_cursor_rectangle'
@@ -498,6 +500,7 @@ type = 'uint'
 [[interface.event.arg]]
 name = 'style'
 type = 'uint'
+enum = 'preedit_style'
 
 [[interface.event]]
 name = 'preedit_cursor'
@@ -638,6 +641,7 @@ summary = 'serial of the latest known text input state'
 [[interface.event.arg]]
 name = 'direction'
 type = 'uint'
+enum = 'text_direction'
 
 [[interface]]
 name = 'zwp_text_input_manager_v1'

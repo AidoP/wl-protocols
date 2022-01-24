@@ -121,6 +121,7 @@ To unset the selection, set the source to NULL.'''
 [[interface.request.arg]]
 name = 'source'
 type = 'object'
+allow-null = true
 interface = 'zwp_primary_selection_source_v1'
 
 [[interface.request.arg]]
@@ -166,6 +167,7 @@ previous selection data_offer, if any, upon receiving this event.'''
 [[interface.event.arg]]
 name = 'id'
 type = 'object'
+allow-null = true
 interface = 'zwp_primary_selection_offer_v1'
 
 [[interface]]

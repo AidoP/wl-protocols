@@ -47,6 +47,19 @@ impl Protocol {
         // The `Reader` does not implement `Iterator` because it outputs borrowed data (`Cow`s)
         let mut buffer = Vec::with_capacity(5);
         #[derive(Debug)]
+        enum EventType {
+            Normal,
+            Destructor
+        }
+        impl EventType {
+            fn is_destructor(&self) -> bool {
+                match self {
+                    Self::Normal => false,
+                    Self::Destructor => true
+                }
+            }
+        }
+        #[derive(Debug)]
         enum State {
             Protocol {
                 name: Option<String>,
@@ -74,6 +87,7 @@ impl Protocol {
             },
             Event {
                 name: Option<String>,
+                destructor: bool,
                 since: Option<u16>,
                 summary: Option<String>,
                 description: Option<String>,
@@ -162,7 +176,7 @@ impl Protocol {
             }
             fn kind(&mut self, v: String) -> Result<(), ParseError> {
                 match self {
-                    Self::Request { destructor, ..} if v == "destructor" => Ok(*destructor = true),
+                    Self::Request { destructor, ..} | Self::Event { destructor, ..} if v == "destructor" => Ok(*destructor = true),
                     _ => Err(ParseError::NoField("type", self.debug()))
                 }
             }
@@ -298,6 +312,7 @@ impl Protocol {
                         b"event" => {
                             let mut event = State::Event {
                                 name: None,
+                                destructor: false,
                                 since: None,
                                 summary: None,
                                 description: None,
@@ -351,6 +366,7 @@ impl Protocol {
                             let parent = state.last_mut().ok_or(ParseError::ExpectedParent("arg"))?;
                             let mut name = None;
                             let mut interface = None;
+                            let mut nullable = None;
                             let mut kind = None;
                             let mut enumeration = None;
                             let mut summary = None;
@@ -358,6 +374,7 @@ impl Protocol {
                                 b"name" => Ok(name = Some(a.unescape_and_decode_value(&reader)?)),
                                 b"interface" => Ok(interface = Some(a.unescape_and_decode_value(&reader)?)),
                                 b"type" => Ok(kind = Some(a.unescape_and_decode_value(&reader)?)),
+                                b"allow-null" => Ok(nullable = Some(a.unescape_and_decode_value(&reader)?)),
                                 b"enum" => Ok(enumeration = Some(a.unescape_and_decode_value(&reader)?)),
                                 b"summary" => Ok(summary = Some(a.unescape_and_decode_value(&reader)?)),
                                 _ => Ok(())
@@ -365,6 +382,7 @@ impl Protocol {
                             parent.arg(Arg {
                                 name: name.ok_or(ParseError::MissingField("name", "arg"))?,
                                 summary,
+                                nullable: if let Some(val) = nullable { Some(val.parse()?) } else { None },
                                 kind: DataType::from_str(&kind.ok_or(ParseError::MissingField("type", "arg"))?)?,
                                 interface,
                                 enumeration
@@ -475,10 +493,11 @@ impl Protocol {
                                 args,
                             })?;
                         },
-                        State::Event { name,since, summary, description, args } => {
+                        State::Event { name, destructor, since, summary, description, args } => {
                             let parent = state.last_mut().ok_or(ParseError::ExpectedParent("event"))?;
                             parent.event(crate::protocol::Event {
                                 name: name.ok_or(ParseError::MissingField("name", "event"))?,
+                                destructor,
                                 summary,
                                 description,
                                 since,
@@ -565,6 +584,8 @@ pub struct Request {
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Event {
     pub name: String,
+    #[serde(skip_serializing_if = "std::ops::Not::not", default)]
+    pub destructor: bool,
     pub since: Option<u16>,
     pub summary: Option<String>,
     pub description: Option<String>,
@@ -586,6 +607,8 @@ pub struct Arg {
     pub name: String,
     #[serde(rename = "type")]
     pub kind: DataType,
+    #[serde(rename = "allow-null")]
+    pub nullable: Option<bool>,
     pub interface: Option<String>,
     #[serde(rename = "enum")]
     pub enumeration: Option<String>,
@@ -631,6 +654,7 @@ pub enum ParseError {
     UnexpectedText,
     ExpectedParent(&'static str),
     InvalidInteger(std::num::ParseIntError),
+    InvalidBool(std::str::ParseBoolError),
     InvalidDataType(String)
 }
 impl From<quick_xml::Error> for ParseError {
@@ -641,6 +665,11 @@ impl From<quick_xml::Error> for ParseError {
 impl From<std::num::ParseIntError> for ParseError {
     fn from(e: std::num::ParseIntError) -> Self {
         Self::InvalidInteger(e)
+    }
+}
+impl From<std::str::ParseBoolError> for ParseError {
+    fn from(e: std::str::ParseBoolError) -> Self {
+        Self::InvalidBool(e)
     }
 }
 impl fmt::Display for ParseError {
@@ -655,6 +684,7 @@ impl fmt::Display for ParseError {
             Self::UnexpectedText => write!(f, "Expected a tag but got text"),
             Self::ExpectedParent(tag) => write!(f, "Tag {:?} requires nesting", tag),
             Self::InvalidInteger(i) => write!(f, "{}", i),
+            Self::InvalidBool(b) => write!(f, "{}", b),
             Self::InvalidDataType(d) => write!(f, "{:?} is not a valid data type", d),
         }
     }

@@ -100,7 +100,9 @@ summary = 'create a shell surface from a surface'
 description = '''
 This creates an xdg_surface for the given surface. While xdg_surface
 itself is not a role, the corresponding surface may only be assigned
-a role extending xdg_surface, such as xdg_toplevel or xdg_popup.
+a role extending xdg_surface, such as xdg_toplevel or xdg_popup. It is
+illegal to create an xdg_surface for a wl_surface which already has an
+assigned role and this will result in a protocol error.
 
 This creates an xdg_surface for the given surface. An xdg_surface is
 used as basis to define a role to a given surface, such as xdg_toplevel
@@ -552,7 +554,7 @@ name = 'set_parent_configure'
 since = 3
 summary = 'set parent configure this is a response to'
 description = '''
-Set the serial of a xdg_surface.configure event this positioner will be
+Set the serial of an xdg_surface.configure event this positioner will be
 used in response to. The compositor may use this information together
 with set_parent_size to determine what future state the popup should be
 constrained using.'''
@@ -590,6 +592,11 @@ Creating an xdg_surface from a wl_surface which has a buffer attached or
 committed is a client error, and any attempts by a client to attach or
 manipulate a buffer prior to the first xdg_surface.configure call must
 also be treated as errors.
+
+After creating a role-specific object and setting it up, the client must
+perform an initial commit without any buffer attached. The compositor
+will reply with an xdg_surface.configure event. The client must
+acknowledge it and is then allowed to attach a buffer to map the surface.
 
 Mapping an xdg_surface-based role surface is defined as making it
 possible for the surface to be shown by the compositor. Note that
@@ -666,6 +673,7 @@ interface = 'xdg_popup'
 [[interface.request.arg]]
 name = 'parent'
 type = 'object'
+allow-null = true
 interface = 'xdg_surface'
 
 [[interface.request.arg]]
@@ -792,7 +800,11 @@ Unmapping an xdg_toplevel means that the surface cannot be shown
 by the compositor until it is explicitly mapped again.
 All active operations (e.g., move, resize) are canceled and all
 attributes (e.g. title, state, stacking, ...) are discarded for
-an xdg_toplevel surface when it is unmapped.
+an xdg_toplevel surface when it is unmapped. The xdg_toplevel returns to
+the state it had right after xdg_surface.get_toplevel. The client
+can re-map the toplevel by perfoming a commit without any buffer
+attached, waiting for a configure event and handling it as usual (see
+xdg_surface description).
 
 Attaching a null buffer to a toplevel unmaps the surface.'''
 version = 3
@@ -896,7 +908,7 @@ value = 4
 [[interface.enum.entry]]
 name = 'tiled_left'
 since = 2
-summary = 'the surface is tiled'
+summary = 'the surface’s left edge is tiled'
 description = '''
 The window is currently in a tiled layout and the left edge is
 considered to be adjacent to another part of the tiling grid.'''
@@ -905,7 +917,7 @@ value = 5
 [[interface.enum.entry]]
 name = 'tiled_right'
 since = 2
-summary = 'the surface is tiled'
+summary = 'the surface’s right edge is tiled'
 description = '''
 The window is currently in a tiled layout and the right edge is
 considered to be adjacent to another part of the tiling grid.'''
@@ -914,7 +926,7 @@ value = 6
 [[interface.enum.entry]]
 name = 'tiled_top'
 since = 2
-summary = 'the surface is tiled'
+summary = 'the surface’s top edge is tiled'
 description = '''
 The window is currently in a tiled layout and the top edge is
 considered to be adjacent to another part of the tiling grid.'''
@@ -923,7 +935,7 @@ value = 7
 [[interface.enum.entry]]
 name = 'tiled_bottom'
 since = 2
-summary = 'the surface is tiled'
+summary = 'the surface’s bottom edge is tiled'
 description = '''
 The window is currently in a tiled layout and the bottom edge is
 considered to be adjacent to another part of the tiling grid.'''
@@ -961,6 +973,7 @@ parent surface.'''
 [[interface.request.arg]]
 name = 'parent'
 type = 'object'
+allow-null = true
 interface = 'xdg_toplevel'
 
 [[interface.request]]
@@ -1307,6 +1320,7 @@ visible below the fullscreened surface.'''
 [[interface.request.arg]]
 name = 'output'
 type = 'object'
+allow-null = true
 interface = 'wl_output'
 
 [[interface.request]]
@@ -1521,12 +1535,12 @@ but the last one.
 
 If the popup is repositioned in response to a configure event for its
 parent, the client should send an xdg_positioner.set_parent_configure
-and possibly a xdg_positioner.set_parent_size request to allow the
+and possibly an xdg_positioner.set_parent_size request to allow the
 compositor to properly constrain the popup.
 
 If the popup is repositioned together with a parent that is being
 resized, but not in response to a configure event, the client should
-send a xdg_positioner.set_parent_size request.'''
+send an xdg_positioner.set_parent_size request.'''
 
 [[interface.request.arg]]
 name = 'positioner'

@@ -380,6 +380,7 @@ summary = 'serial of the enter event'
 [[interface.request.arg]]
 name = 'surface'
 type = 'object'
+allow-null = true
 interface = 'wl_surface'
 
 [[interface.request.arg]]

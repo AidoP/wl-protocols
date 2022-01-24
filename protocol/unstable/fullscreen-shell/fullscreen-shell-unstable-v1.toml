@@ -141,6 +141,11 @@ name = 'invalid_method'
 summary = 'present_method is not known'
 value = 0
 
+[[interface.enum.entry]]
+name = 'role'
+summary = 'given wl_surface has another role'
+value = 1
+
 [[interface.request]]
 name = 'release'
 destructor = true
@@ -172,20 +177,27 @@ output. The compositor is free to ignore this parameter.
 The "zoom", "zoom_crop", and "stretch" methods imply a scaling
 operation on the surface. This will override any kind of output
 scaling, so the buffer_scale property of the surface is effectively
-ignored.'''
+ignored.
+
+This request gives the surface the role of a fullscreen shell surface.
+If the surface already has another role, it raises a role protocol
+error.'''
 
 [[interface.request.arg]]
 name = 'surface'
 type = 'object'
+allow-null = true
 interface = 'wl_surface'
 
 [[interface.request.arg]]
 name = 'method'
 type = 'uint'
+enum = 'present_method'
 
 [[interface.request.arg]]
 name = 'output'
 type = 'object'
+allow-null = true
 interface = 'wl_output'
 
 [[interface.request]]
@@ -228,7 +240,11 @@ value of 0 indicates that the client has no preference.
 If the value of wl_output.scale differs from wl_surface.buffer_scale,
 then the compositor may choose a mode that matches either the buffer
 size or the surface size. In either case, the surface will fill the
-output.'''
+output.
+
+This request gives the surface the role of a fullscreen shell surface.
+If the surface already has another role, it raises a role protocol
+error.'''
 
 [[interface.request.arg]]
 name = 'surface'
@@ -265,6 +281,7 @@ receive all the capability events.'''
 [[interface.event.arg]]
 name = 'capability'
 type = 'uint'
+enum = 'capability'
 
 [[interface]]
 name = 'zwp_fullscreen_shell_mode_feedback_v1'

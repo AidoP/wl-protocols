@@ -353,6 +353,7 @@ is raised.'''
 [[interface.request.arg]]
 name = 'parent'
 type = 'object'
+allow-null = true
 interface = 'xdg_surface'
 
 [[interface.request]]
@@ -655,6 +656,7 @@ black borders filling the rest of the output.'''
 [[interface.request.arg]]
 name = 'output'
 type = 'object'
+allow-null = true
 interface = 'wl_output'
 
 [[interface.request]]

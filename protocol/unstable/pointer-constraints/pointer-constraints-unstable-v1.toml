@@ -168,12 +168,14 @@ summary = 'the pointer that should be locked'
 [[interface.request.arg]]
 name = 'region'
 type = 'object'
+allow-null = true
 interface = 'wl_region'
 summary = 'region of surface'
 
 [[interface.request.arg]]
 name = 'lifetime'
 type = 'uint'
+enum = 'lifetime'
 summary = 'lock lifetime'
 
 [[interface.request]]
@@ -218,12 +220,14 @@ summary = 'the pointer that should be confined'
 [[interface.request.arg]]
 name = 'region'
 type = 'object'
+allow-null = true
 interface = 'wl_region'
 summary = 'region of surface'
 
 [[interface.request.arg]]
 name = 'lifetime'
 type = 'uint'
+enum = 'lifetime'
 summary = 'confinement lifetime'
 
 [[interface]]
@@ -304,6 +308,7 @@ For details about the lock region, see wp_locked_pointer.'''
 [[interface.request.arg]]
 name = 'region'
 type = 'object'
+allow-null = true
 interface = 'wl_region'
 summary = 'region of surface'
 
@@ -377,6 +382,7 @@ For details about the confine region, see wp_confined_pointer.'''
 [[interface.request.arg]]
 name = 'region'
 type = 'object'
+allow-null = true
 interface = 'wl_region'
 summary = 'region of surface'
 
